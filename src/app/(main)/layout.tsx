@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { Header } from "@/components/layout/header";
+import { GroupProvider } from "@/contexts/group-context";
 
 export default async function MainLayout({
   children,
@@ -17,9 +18,11 @@ export default async function MainLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main>{children}</main>
-    </div>
+    <GroupProvider>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main>{children}</main>
+      </div>
+    </GroupProvider>
   );
 }

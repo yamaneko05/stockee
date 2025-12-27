@@ -15,22 +15,29 @@ import type { ItemModel } from "@/generated/prisma/models/Item";
 
 type ItemCardProps = {
   item: ItemModel;
+  onUpdate?: () => void;
+  noBorderRadius?: "left" | "right";
 };
 
-export function ItemCard({ item }: ItemCardProps) {
+export function ItemCard({ item, onUpdate, noBorderRadius }: ItemCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [quantity, setQuantity] = useState(item.quantity);
 
   const handleIncrement = () => {
+    setQuantity((prev) => prev + 1);
     startTransition(async () => {
       await incrementStock(item.id);
+      onUpdate?.();
     });
   };
 
   const handleDecrement = () => {
-    if (item.quantity <= 0) return;
+    if (quantity <= 0) return;
+    setQuantity((prev) => prev - 1);
     startTransition(async () => {
       await decrementStock(item.id);
+      onUpdate?.();
     });
   };
 
@@ -39,12 +46,20 @@ export function ItemCard({ item }: ItemCardProps) {
     setIsDeleting(true);
     startTransition(async () => {
       await deleteItem(item.id);
+      onUpdate?.();
     });
   };
 
+  const borderRadiusClass =
+    noBorderRadius === "left"
+      ? "rounded-r-lg rounded-l-none"
+      : noBorderRadius === "right"
+        ? "rounded-l-lg rounded-r-none"
+        : "rounded-lg";
+
   return (
     <div
-      className={`rounded-lg border bg-card p-3 shadow-sm ${
+      className={`border bg-card p-3 ${borderRadiusClass} ${
         isDeleting ? "opacity-50" : ""
       }`}
     >
@@ -58,16 +73,16 @@ export function ItemCard({ item }: ItemCardProps) {
             variant="outline"
             size="icon-sm"
             onClick={handleDecrement}
-            disabled={isPending || item.quantity <= 0}
+            disabled={isPending || quantity <= 0}
           >
             <Minus className="h-4 w-4" />
           </Button>
-          <div className="flex min-w-[60px] items-center justify-center gap-1 text-sm">
-            {item.quantity === 0 && (
+          <div className="flex min-w-15 items-center justify-center gap-1 text-sm">
+            {quantity === 0 && (
               <AlertTriangle className="h-4 w-4 text-amber-500" />
             )}
-            <span className={item.quantity === 0 ? "text-amber-500" : ""}>
-              {item.quantity}
+            <span className={quantity === 0 ? "text-amber-500" : ""}>
+              {quantity}
               {item.unit}
             </span>
           </div>

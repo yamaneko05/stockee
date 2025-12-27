@@ -20,6 +20,7 @@ import {
   type CreateItemInput,
 } from "@/lib/validations/item";
 import { createItem, updateItem } from "@/actions/item";
+import { useGroup } from "@/contexts/group-context";
 import type { ItemModel } from "@/generated/prisma/models/Item";
 
 const UNITS = ["個", "本", "箱", "パック", "袋", "枚"] as const;
@@ -29,6 +30,7 @@ type ItemFormProps = {
 };
 
 export function ItemForm({ item }: ItemFormProps) {
+  const { selectedGroupId } = useGroup();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const isEditing = !!item;
@@ -58,7 +60,7 @@ export function ItemForm({ item }: ItemFormProps) {
       if (isEditing) {
         await updateItem(item.id, data);
       } else {
-        await createItem(data);
+        await createItem(data, selectedGroupId);
       }
       router.push("/");
     });

@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GroupSwitcher } from "./group-switcher";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="flex h-14 items-center justify-between px-4">
-        <Link href={"/"}>
-          <h1 className="text-2xl font-semibold">Stockee</h1>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href={"/"}>
+            <h1 className="text-2xl font-semibold">Stockee</h1>
+          </Link>
+          <GroupSwitcher />
+        </div>
         <Button variant="ghost" size="icon" asChild>
           <Link href="/settings">
             <Settings className="h-5 w-5" />
