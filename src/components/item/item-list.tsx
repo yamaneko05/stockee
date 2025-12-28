@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Plus, Settings } from "lucide-react";
 import {
@@ -20,13 +20,26 @@ import {
 } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { SortableItemCard } from "@/components/item/sortable-item-card";
+import { CategoryFilter } from "@/components/category/category-filter";
 import { getItems, reorderItems } from "@/actions/item";
+import { getCategories } from "@/actions/category";
 import { useGroup } from "@/contexts/group-context";
 import type { ItemModel } from "@/generated/prisma/models/Item";
+import type { CategoryModel } from "@/generated/prisma/models/Category";
+
+type ItemWithCategory = ItemModel & { category: CategoryModel | null };
+
+type Category = {
+  id: string;
+  name: string;
+  color: string | null;
+};
 
 export function ItemList() {
   const { selectedGroupId } = useGroup();
-  const [items, setItems] = useState<ItemModel[]>([]);
+  const [items, setItems] = useState<ItemWithCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const sensors = useSensors(
@@ -41,25 +54,44 @@ export function ItemList() {
   );
 
   useEffect(() => {
-    async function loadItems() {
+    async function loadData() {
       setIsLoading(true);
+      setSelectedCategoryId(null);
       try {
-        const data = await getItems(selectedGroupId);
-        setItems(data);
+        const itemsData = await getItems(selectedGroupId);
+        setItems(itemsData);
+
+        if (selectedGroupId) {
+          const categoriesData = await getCategories(selectedGroupId);
+          setCategories(categoriesData);
+        } else {
+          setCategories([]);
+        }
       } catch (error) {
-        console.error("Failed to load items:", error);
+        console.error("Failed to load data:", error);
         setItems([]);
+        setCategories([]);
       } finally {
         setIsLoading(false);
       }
     }
-    loadItems();
+    loadData();
   }, [selectedGroupId]);
 
   const refreshItems = async () => {
     const data = await getItems(selectedGroupId);
     setItems(data);
   };
+
+  const filteredItems = useMemo(() => {
+    if (selectedCategoryId === null) {
+      return items;
+    }
+    if (selectedCategoryId === "uncategorized") {
+      return items.filter((item) => !item.categoryId);
+    }
+    return items.filter((item) => item.categoryId === selectedCategoryId);
+  }, [items, selectedCategoryId]);
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -115,9 +147,19 @@ export function ItemList() {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 space-y-4">
+        {categories.length > 0 && (
+          <CategoryFilter
+            categories={categories}
+            selectedCategoryId={selectedCategoryId}
+            onSelect={setSelectedCategoryId}
+          />
+        )}
+
         {items.length === 0 ? (
           <p className="text-muted-foreground">品目がありません</p>
+        ) : filteredItems.length === 0 ? (
+          <p className="text-muted-foreground">該当する品目がありません</p>
         ) : (
           <DndContext
             sensors={sensors}
@@ -125,11 +167,11 @@ export function ItemList() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={items.map((item) => item.id)}
+              items={filteredItems.map((item) => item.id)}
               strategy={verticalListSortingStrategy}
             >
               <div className="flex flex-col gap-3">
-                {items.map((item) => (
+                {filteredItems.map((item) => (
                   <SortableItemCard
                     key={item.id}
                     item={item}

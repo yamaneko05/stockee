@@ -98,7 +98,26 @@ model Item {
   groupId String?
   group   Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
   @@map("item")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  color     String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  items Item[]
+
+  @@unique([groupId, name])
+  @@map("category")
 }
 
 // ============================================
@@ -114,8 +133,9 @@ model Group {
   ownerId String
   owner   User   @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
-  members GroupMember[]
-  items   Item[]
+  members    GroupMember[]
+  items      Item[]
+  categories Category[]
 
   @@map("group")
 }

@@ -66,6 +66,12 @@ export async function getGroup(id: string) {
         },
         orderBy: { createdAt: "asc" },
       },
+      categories: {
+        include: {
+          _count: { select: { items: true } },
+        },
+        orderBy: { sortOrder: "asc" },
+      },
     },
   });
 
@@ -83,6 +89,13 @@ export async function getGroup(id: string) {
       id: m.id,
       user: m.user,
       createdAt: m.createdAt,
+    })),
+    categories: group.categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      color: c.color,
+      sortOrder: c.sortOrder,
+      itemCount: c._count.items,
     })),
   };
 }

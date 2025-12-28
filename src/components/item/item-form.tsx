@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,19 +20,27 @@ import {
   type CreateItemInput,
 } from "@/lib/validations/item";
 import { createItem, updateItem } from "@/actions/item";
+import { getCategories } from "@/actions/category";
 import { useGroup } from "@/contexts/group-context";
 import type { ItemModel } from "@/generated/prisma/models/Item";
 
 const UNITS = ["個", "本", "箱", "パック", "袋", "枚"] as const;
 
+type Category = {
+  id: string;
+  name: string;
+  color: string | null;
+};
+
 type ItemFormProps = {
-  item?: ItemModel;
+  item?: ItemModel & { categoryId?: string | null };
 };
 
 export function ItemForm({ item }: ItemFormProps) {
   const { selectedGroupId } = useGroup();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [categories, setCategories] = useState<Category[]>([]);
   const isEditing = !!item;
 
   const {
@@ -51,10 +59,22 @@ export function ItemForm({ item }: ItemFormProps) {
       unit: item?.unit ?? "個",
       note: item?.note ?? "",
       threshold: item?.threshold ?? undefined,
+      categoryId: item?.categoryId ?? null,
     },
   });
 
   const currentUnit = useWatch({ control, name: "unit" });
+  const currentCategoryId = useWatch({ control, name: "categoryId" });
+
+  useEffect(() => {
+    if (selectedGroupId) {
+      getCategories(selectedGroupId).then(setCategories);
+    } else {
+      startTransition(() => {
+        setCategories([]);
+      });
+    }
+  }, [selectedGroupId]);
 
   const onSubmit = (data: CreateItemInput) => {
     startTransition(async () => {
@@ -159,6 +179,36 @@ export function ItemForm({ item }: ItemFormProps) {
           <p className="text-sm text-destructive">{errors.threshold.message}</p>
         )}
       </div>
+
+      {selectedGroupId && categories.length > 0 && (
+        <div className="space-y-2">
+          <Label htmlFor="category">カテゴリ</Label>
+          <Select
+            value={currentCategoryId ?? "none"}
+            onValueChange={(value) => setValue("categoryId", value === "none" ? null : value)}
+          >
+            <SelectTrigger id="category">
+              <SelectValue placeholder="カテゴリを選択" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">未分類</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  <span className="flex items-center gap-2">
+                    {category.color && (
+                      <span
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: category.color }}
+                      />
+                    )}
+                    {category.name}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="note">備考</Label>

@@ -52,12 +52,14 @@ export async function getItems(groupId?: string | null) {
     }
     return prisma.item.findMany({
       where: { groupId },
+      include: { category: true },
       orderBy: { sortOrder: "asc" },
     });
   }
 
   return prisma.item.findMany({
     where: { userId: user.id, groupId: null },
+    include: { category: true },
     orderBy: { sortOrder: "asc" },
   });
 }

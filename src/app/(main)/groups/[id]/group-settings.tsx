@@ -3,11 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Copy, Check, RefreshCw, Trash2, LogOut, Users } from "lucide-react";
+import { ArrowLeft, Copy, Check, RefreshCw, Trash2, LogOut, Users, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { deleteGroup, leaveGroup, regenerateInviteCode, removeMember } from "@/actions/group";
 import { useGroup } from "@/contexts/group-context";
+import { CategoryList } from "@/components/category/category-list";
+
+type Category = {
+  id: string;
+  name: string;
+  color: string | null;
+  sortOrder: number;
+  itemCount: number;
+};
 
 type GroupData = {
   id: string;
@@ -20,6 +29,7 @@ type GroupData = {
     user: { id: string; name: string; email: string };
     createdAt: Date;
   }[];
+  categories: Category[];
 };
 
 export function GroupSettings({ group }: { group: GroupData }) {
@@ -172,6 +182,25 @@ export function GroupSettings({ group }: { group: GroupData }) {
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Tags className="h-4 w-4" />
+              カテゴリ
+            </CardTitle>
+            <CardDescription>
+              品目を分類するカテゴリを管理できます
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CategoryList
+              groupId={group.id}
+              categories={group.categories}
+              onUpdate={() => router.refresh()}
+            />
           </CardContent>
         </Card>
 
