@@ -84,107 +84,121 @@ export function ItemForm({ item }: ItemFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-2">
+      {/* 品目名 */}
+      <div className="space-y-2 sm:grid sm:grid-cols-[140px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
         <Label htmlFor="name">
           品目名 <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="name"
-          {...register("name")}
-          aria-invalid={!!errors.name}
-        />
-        {errors.name && (
-          <p className="text-sm text-destructive">{errors.name.message}</p>
-        )}
+        <div>
+          <Input
+            id="name"
+            placeholder="例: 牛乳"
+            {...register("name")}
+            aria-invalid={!!errors.name}
+          />
+          {errors.name && (
+            <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-2">
+      {/* 商品名 */}
+      <div className="space-y-2 sm:grid sm:grid-cols-[140px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
         <Label htmlFor="productName">商品名</Label>
-        <Input id="productName" {...register("productName")} />
+        <Input id="productName" placeholder="例: 明治おいしい牛乳 1L" {...register("productName")} />
       </div>
 
-      <div className="space-y-2">
+      {/* 価格 */}
+      <div className="space-y-2 sm:grid sm:grid-cols-[140px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
         <Label htmlFor="price">価格（円）</Label>
         <Input
           id="price"
           type="number"
           min="0"
+          placeholder="例: 298"
+          className="sm:max-w-32"
           {...register("price", {
             setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
           })}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="quantity">
-            在庫数 <span className="text-destructive">*</span>
-          </Label>
+      {/* 在庫数・単位 */}
+      <div className="space-y-2 sm:grid sm:grid-cols-[140px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
+        <Label htmlFor="quantity">
+          在庫数 <span className="text-destructive">*</span>
+        </Label>
+        <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
+          <div>
+            <Input
+              id="quantity"
+              type="number"
+              min="0"
+              placeholder="0"
+              className="sm:w-24"
+              {...register("quantity", { valueAsNumber: true })}
+              aria-invalid={!!errors.quantity}
+            />
+            {errors.quantity && (
+              <p className="mt-1 text-sm text-destructive">{errors.quantity.message}</p>
+            )}
+          </div>
+          <div>
+            <Select
+              value={currentUnit}
+              onValueChange={(value) => setValue("unit", value)}
+            >
+              <SelectTrigger id="unit" className="sm:w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {UNITS.map((unit) => (
+                  <SelectItem key={unit} value={unit}>
+                    {unit}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.unit && (
+              <p className="mt-1 text-sm text-destructive">{errors.unit.message}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 在庫閾値 */}
+      <div className="space-y-2 sm:grid sm:grid-cols-[140px_1fr] sm:items-start sm:gap-4 sm:space-y-0">
+        <Label htmlFor="threshold" className="sm:pt-2">在庫閾値</Label>
+        <div>
           <Input
-            id="quantity"
+            id="threshold"
             type="number"
             min="0"
-            {...register("quantity", { valueAsNumber: true })}
-            aria-invalid={!!errors.quantity}
+            placeholder="設定なし"
+            className="sm:max-w-32"
+            {...register("threshold", {
+              setValueAs: (v) => (v === "" ? null : parseInt(v, 10)),
+            })}
+            aria-invalid={!!errors.threshold}
           />
-          {errors.quantity && (
-            <p className="text-sm text-destructive">{errors.quantity.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="unit">
-            単位 <span className="text-destructive">*</span>
-          </Label>
-          <Select
-            value={currentUnit}
-            onValueChange={(value) => setValue("unit", value)}
-          >
-            <SelectTrigger id="unit">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {UNITS.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.unit && (
-            <p className="text-sm text-destructive">{errors.unit.message}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            この数量未満になると警告を表示します
+          </p>
+          {errors.threshold && (
+            <p className="mt-1 text-sm text-destructive">{errors.threshold.message}</p>
           )}
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="threshold">在庫閾値</Label>
-        <Input
-          id="threshold"
-          type="number"
-          min="0"
-          placeholder="設定なし"
-          {...register("threshold", {
-            setValueAs: (v) => (v === "" ? null : parseInt(v, 10)),
-          })}
-          aria-invalid={!!errors.threshold}
-        />
-        <p className="text-xs text-muted-foreground">
-          この数量未満になると警告を表示します
-        </p>
-        {errors.threshold && (
-          <p className="text-sm text-destructive">{errors.threshold.message}</p>
-        )}
-      </div>
-
+      {/* カテゴリ */}
       {categories.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2 sm:grid sm:grid-cols-[140px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
           <Label htmlFor="category">カテゴリ</Label>
           <Select
             value={currentCategoryId ?? "none"}
             onValueChange={(value) => setValue("categoryId", value === "none" ? null : value)}
           >
-            <SelectTrigger id="category">
+            <SelectTrigger id="category" className="sm:max-w-48">
               <SelectValue placeholder="カテゴリを選択" />
             </SelectTrigger>
             <SelectContent>
@@ -207,14 +221,18 @@ export function ItemForm({ item }: ItemFormProps) {
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="note">備考</Label>
-        <Textarea id="note" rows={3} {...register("note")} />
+      {/* 備考 */}
+      <div className="space-y-2 sm:grid sm:grid-cols-[140px_1fr] sm:items-start sm:gap-4 sm:space-y-0">
+        <Label htmlFor="note" className="sm:pt-2">備考</Label>
+        <Textarea id="note" rows={3} placeholder="購入場所やメモなど" {...register("note")} />
       </div>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? "保存中..." : isEditing ? "更新する" : "登録する"}
-      </Button>
+      <div className="sm:grid sm:grid-cols-[140px_1fr] sm:gap-4">
+        <div></div>
+        <Button type="submit" className="w-full sm:w-auto" disabled={isPending}>
+          {isPending ? "保存中..." : isEditing ? "更新する" : "登録する"}
+        </Button>
+      </div>
     </form>
   );
 }

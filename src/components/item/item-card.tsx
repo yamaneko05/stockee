@@ -70,9 +70,9 @@ export function ItemCard({ item, onUpdate, noBorderRadius }: ItemCardProps) {
 
   return (
     <div
-      className={`relative border bg-card p-3 ${borderRadiusClass} ${
+      className={`relative border bg-card p-3 transition-colors ${borderRadiusClass} ${
         isDeleting ? "opacity-50" : ""
-      } ${showWarning ? "border-amber-500/50 bg-amber-50 dark:bg-amber-950/20" : ""}`}
+      } ${showWarning ? "border-amber-500/50 bg-amber-50 dark:bg-amber-950/20" : "hover:bg-muted/50"}`}
     >
       {/* 警告時の左端カラーバー */}
       {showWarning && (

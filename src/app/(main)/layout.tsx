@@ -21,7 +21,7 @@ export default async function MainLayout({
     <GroupProvider>
       <div className="min-h-screen bg-background">
         <Header />
-        <main>{children}</main>
+        <main className="mx-auto max-w-2xl">{children}</main>
       </div>
     </GroupProvider>
   );
