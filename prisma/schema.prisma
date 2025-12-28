@@ -25,6 +25,7 @@ model User {
   items        Item[]
   ownedGroups  Group[]       @relation("GroupOwner")
   groupMembers GroupMember[]
+  categories   Category[]
 
   @@map("user")
 }
@@ -111,12 +112,16 @@ model Category {
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
-  groupId String
-  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String?
+  group   Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   items Item[]
 
   @@unique([groupId, name])
+  @@unique([userId, name])
   @@map("category")
 }
 

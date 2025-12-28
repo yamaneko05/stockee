@@ -61,12 +61,9 @@ export function ItemList() {
         const itemsData = await getItems(selectedGroupId);
         setItems(itemsData);
 
-        if (selectedGroupId) {
-          const categoriesData = await getCategories(selectedGroupId);
-          setCategories(categoriesData);
-        } else {
-          setCategories([]);
-        }
+        // グループ選択時はグループのカテゴリ、未選択時は個人のカテゴリを取得
+        const categoriesData = await getCategories(selectedGroupId);
+        setCategories(categoriesData);
       } catch (error) {
         console.error("Failed to load data:", error);
         setItems([]);

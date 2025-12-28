@@ -32,11 +32,32 @@ async function verifyGroupAccess(groupId: string) {
   return { user, group };
 }
 
-export async function getCategories(groupId: string) {
-  await verifyGroupAccess(groupId);
+export async function getCategories(groupId?: string | null) {
+  const user = await getCurrentUser();
 
+  if (groupId) {
+    await verifyGroupAccess(groupId);
+
+    const categories = await prisma.category.findMany({
+      where: { groupId },
+      include: {
+        _count: { select: { items: true } },
+      },
+      orderBy: { sortOrder: "asc" },
+    });
+
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      color: c.color,
+      sortOrder: c.sortOrder,
+      itemCount: c._count.items,
+    }));
+  }
+
+  // 個人用カテゴリ
   const categories = await prisma.category.findMany({
-    where: { groupId },
+    where: { userId: user.id, groupId: null },
     include: {
       _count: { select: { items: true } },
     },
@@ -52,14 +73,49 @@ export async function getCategories(groupId: string) {
   }));
 }
 
-export async function createCategory(groupId: string, input: CreateCategoryInput) {
-  await verifyGroupAccess(groupId);
+export async function createCategory(input: CreateCategoryInput, groupId?: string | null) {
+  const user = await getCurrentUser();
   const validated = createCategorySchema.parse(input);
 
+  if (groupId) {
+    await verifyGroupAccess(groupId);
+
+    const existingCategory = await prisma.category.findUnique({
+      where: {
+        groupId_name: {
+          groupId,
+          name: validated.name,
+        },
+      },
+    });
+
+    if (existingCategory) {
+      throw new Error("同じ名前のカテゴリが既に存在します");
+    }
+
+    const maxSortOrder = await prisma.category.aggregate({
+      where: { groupId },
+      _max: { sortOrder: true },
+    });
+
+    const category = await prisma.category.create({
+      data: {
+        name: validated.name,
+        color: validated.color ?? null,
+        sortOrder: (maxSortOrder._max.sortOrder ?? -1) + 1,
+        groupId,
+      },
+    });
+
+    revalidatePath("/");
+    return category;
+  }
+
+  // 個人用カテゴリ
   const existingCategory = await prisma.category.findUnique({
     where: {
-      groupId_name: {
-        groupId,
+      userId_name: {
+        userId: user.id,
         name: validated.name,
       },
     },
@@ -70,7 +126,7 @@ export async function createCategory(groupId: string, input: CreateCategoryInput
   }
 
   const maxSortOrder = await prisma.category.aggregate({
-    where: { groupId },
+    where: { userId: user.id, groupId: null },
     _max: { sortOrder: true },
   });
 
@@ -79,7 +135,7 @@ export async function createCategory(groupId: string, input: CreateCategoryInput
       name: validated.name,
       color: validated.color ?? null,
       sortOrder: (maxSortOrder._max.sortOrder ?? -1) + 1,
-      groupId,
+      userId: user.id,
     },
   });
 
@@ -91,15 +147,24 @@ export async function updateCategory(categoryId: string, input: UpdateCategoryIn
   const user = await getCurrentUser();
   const validated = updateCategorySchema.parse(input);
 
+  // グループまたは個人のカテゴリを検索
   const category = await prisma.category.findFirst({
     where: {
       id: categoryId,
-      group: {
-        OR: [
-          { ownerId: user.id },
-          { members: { some: { userId: user.id } } },
-        ],
-      },
+      OR: [
+        // グループカテゴリ
+        {
+          groupId: { not: null },
+          group: {
+            OR: [
+              { ownerId: user.id },
+              { members: { some: { userId: user.id } } },
+            ],
+          },
+        },
+        // 個人カテゴリ
+        { userId: user.id, groupId: null },
+      ],
     },
   });
 
@@ -108,17 +173,32 @@ export async function updateCategory(categoryId: string, input: UpdateCategoryIn
   }
 
   if (validated.name && validated.name !== category.name) {
-    const existingCategory = await prisma.category.findUnique({
-      where: {
-        groupId_name: {
-          groupId: category.groupId,
-          name: validated.name,
+    if (category.groupId) {
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          groupId_name: {
+            groupId: category.groupId,
+            name: validated.name,
+          },
         },
-      },
-    });
+      });
 
-    if (existingCategory) {
-      throw new Error("同じ名前のカテゴリが既に存在します");
+      if (existingCategory) {
+        throw new Error("同じ名前のカテゴリが既に存在します");
+      }
+    } else if (category.userId) {
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          userId_name: {
+            userId: category.userId,
+            name: validated.name,
+          },
+        },
+      });
+
+      if (existingCategory) {
+        throw new Error("同じ名前のカテゴリが既に存在します");
+      }
     }
   }
 
@@ -140,12 +220,20 @@ export async function deleteCategory(categoryId: string) {
   const category = await prisma.category.findFirst({
     where: {
       id: categoryId,
-      group: {
-        OR: [
-          { ownerId: user.id },
-          { members: { some: { userId: user.id } } },
-        ],
-      },
+      OR: [
+        // グループカテゴリ
+        {
+          groupId: { not: null },
+          group: {
+            OR: [
+              { ownerId: user.id },
+              { members: { some: { userId: user.id } } },
+            ],
+          },
+        },
+        // 個人カテゴリ
+        { userId: user.id, groupId: null },
+      ],
     },
   });
 
@@ -160,9 +248,13 @@ export async function deleteCategory(categoryId: string) {
   revalidatePath("/");
 }
 
-export async function reorderCategories(groupId: string, items: ReorderCategoriesInput) {
-  await verifyGroupAccess(groupId);
+export async function reorderCategories(items: ReorderCategoriesInput, groupId?: string | null) {
+  await getCurrentUser();
   const validated = reorderCategoriesSchema.parse(items);
+
+  if (groupId) {
+    await verifyGroupAccess(groupId);
+  }
 
   await prisma.$transaction(
     validated.map((item) =>

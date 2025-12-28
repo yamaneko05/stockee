@@ -23,7 +23,7 @@ type Category = {
 };
 
 type CategoryListProps = {
-  groupId: string;
+  groupId?: string | null;
   categories: Category[];
   onUpdate: () => void;
 };
@@ -67,7 +67,7 @@ export function CategoryList({ groupId, categories, onUpdate }: CategoryListProp
         if (editingCategory) {
           await updateCategory(editingCategory.id, { name: name.trim(), color });
         } else {
-          await createCategory(groupId, { name: name.trim(), color });
+          await createCategory({ name: name.trim(), color }, groupId);
         }
         handleCloseDialog();
         onUpdate();
@@ -126,7 +126,7 @@ export function CategoryList({ groupId, categories, onUpdate }: CategoryListProp
 
     startTransition(async () => {
       try {
-        await reorderCategories(groupId, reorderedItems);
+        await reorderCategories(reorderedItems, groupId);
         onUpdate();
       } catch (err) {
         alert(err instanceof Error ? err.message : "エラーが発生しました");

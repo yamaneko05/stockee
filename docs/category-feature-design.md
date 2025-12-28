@@ -8,13 +8,13 @@
 
 | 項目 | 方針 |
 |------|------|
-| カテゴリ管理範囲 | グループごとに独自のカテゴリを管理 |
+| カテゴリ管理範囲 | グループごと、または個人で独自のカテゴリを管理 |
 | 品目へのカテゴリ割り当て | 1品目につき1カテゴリのみ |
 | 階層構造 | なし（フラット） |
 
 ## データベース設計
 
-### Categoryモデル（新規）
+### Categoryモデル
 
 ```prisma
 model Category {
@@ -24,15 +24,27 @@ model Category {
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
-  groupId String
-  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  // グループ用カテゴリの場合
+  groupId String?
+  group   Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  // 個人用カテゴリの場合
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   items Item[]
 
+  // グループ内またはユーザー内でユニーク
   @@unique([groupId, name])
+  @@unique([userId, name])
   @@map("category")
 }
 ```
+
+**ルール:**
+- `groupId`と`userId`はどちらか一方のみ設定される（排他的）
+- グループのカテゴリ: `groupId`が設定され、`userId`はnull
+- 個人のカテゴリ: `userId`が設定され、`groupId`はnull
 
 ### Itemモデル（変更）
 
@@ -55,17 +67,27 @@ model Group {
 }
 ```
 
+### Userモデル（変更）
+
+```prisma
+model User {
+  // ... 既存フィールド
+
+  categories Category[]
+}
+```
+
 ## API設計
 
 ### Server Actions
 
 | アクション | 説明 |
 |-----------|------|
-| `getCategories(groupId)` | グループのカテゴリ一覧を取得 |
-| `createCategory(groupId, data)` | カテゴリを作成 |
+| `getCategories(groupId?)` | カテゴリ一覧を取得（groupIdがnullの場合は個人カテゴリ） |
+| `createCategory(data, groupId?)` | カテゴリを作成（groupIdがnullの場合は個人カテゴリ） |
 | `updateCategory(categoryId, data)` | カテゴリを更新 |
 | `deleteCategory(categoryId)` | カテゴリを削除（品目のcategoryIdはnullに） |
-| `reorderCategories(items)` | カテゴリの並び順を更新 |
+| `reorderCategories(items, groupId?)` | カテゴリの並び順を更新 |
 
 ### バリデーションスキーマ
 
@@ -81,7 +103,9 @@ export const createCategorySchema = z.object({
 
 ### 1. カテゴリ管理画面
 
-**パス**: `/groups/[groupId]/categories`
+#### グループ用カテゴリ
+
+**パス**: `/groups/[groupId]`（グループ設定画面内）
 
 **機能**:
 - カテゴリ一覧表示
@@ -90,6 +114,13 @@ export const createCategorySchema = z.object({
 - カテゴリ削除
 - ドラッグ&ドロップで並び替え
 
+#### 個人用カテゴリ
+
+**パス**: `/settings`（設定画面内）
+
+**機能**:
+- グループ用と同じ機能を個人向けに提供
+
 ### 2. 品目フォーム変更
 
 **ファイル**: `src/components/item/item-form.tsx`
@@ -97,14 +128,16 @@ export const createCategorySchema = z.object({
 **変更内容**:
 - カテゴリ選択ドロップダウンを追加
 - カテゴリ未選択も許可（任意項目）
+- グループ選択時はグループのカテゴリ、未選択時は個人のカテゴリを表示
 
 ### 3. 在庫一覧のフィルタリング
 
-**ファイル**: `src/app/(main)/page.tsx`
+**ファイル**: `src/components/item/item-list.tsx`
 
 **変更内容**:
 - カテゴリフィルタータブ/チップを追加
 - 「すべて」「未分類」+ 各カテゴリで絞り込み
+- グループ選択時はグループのカテゴリ、未選択時は個人のカテゴリでフィルタリング
 
 ## ファイル構成
 

@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { PersonalCategories } from "./personal-categories";
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({
@@ -48,6 +49,8 @@ export default async function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <PersonalCategories />
 
         <LogoutButton />
       </div>
