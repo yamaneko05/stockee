@@ -5,9 +5,12 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { ItemCard } from "@/components/item/item-card";
 import type { ItemModel } from "@/generated/prisma/models/Item";
+import type { CategoryModel } from "@/generated/prisma/models/Category";
+
+type ItemWithCategory = ItemModel & { category?: CategoryModel | null };
 
 type SortableItemCardProps = {
-  item: ItemModel;
+  item: ItemWithCategory;
   onUpdate?: () => void;
 };
 

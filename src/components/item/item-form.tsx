@@ -170,7 +170,7 @@ export function ItemForm({ item }: ItemFormProps) {
           aria-invalid={!!errors.threshold}
         />
         <p className="text-xs text-muted-foreground">
-          この数量以下になると警告を表示します
+          この数量未満になると警告を表示します
         </p>
         {errors.threshold && (
           <p className="text-sm text-destructive">{errors.threshold.message}</p>
