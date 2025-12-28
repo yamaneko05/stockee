@@ -7,6 +7,7 @@ export const createItemSchema = z.object({
   quantity: z.number().int().min(0, "在庫数は0以上である必要があります"),
   unit: z.string().min(1, "単位は必須です"),
   note: z.string().optional(),
+  threshold: z.number().int().min(0, "閾値は0以上である必要があります").nullable().optional(),
 });
 
 export const updateItemSchema = createItemSchema.partial();

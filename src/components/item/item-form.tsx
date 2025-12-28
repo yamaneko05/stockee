@@ -50,6 +50,7 @@ export function ItemForm({ item }: ItemFormProps) {
       quantity: item?.quantity ?? 0,
       unit: item?.unit ?? "個",
       note: item?.note ?? "",
+      threshold: item?.threshold ?? undefined,
     },
   });
 
@@ -137,6 +138,26 @@ export function ItemForm({ item }: ItemFormProps) {
             <p className="text-sm text-destructive">{errors.unit.message}</p>
           )}
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="threshold">在庫閾値</Label>
+        <Input
+          id="threshold"
+          type="number"
+          min="0"
+          placeholder="設定なし"
+          {...register("threshold", {
+            setValueAs: (v) => (v === "" ? null : parseInt(v, 10)),
+          })}
+          aria-invalid={!!errors.threshold}
+        />
+        <p className="text-xs text-muted-foreground">
+          この数量以下になると警告を表示します
+        </p>
+        {errors.threshold && (
+          <p className="text-sm text-destructive">{errors.threshold.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">

@@ -57,13 +57,20 @@ export function ItemCard({ item, onUpdate, noBorderRadius }: ItemCardProps) {
         ? "rounded-l-lg rounded-r-none"
         : "rounded-lg";
 
+  // 閾値警告の判定
+  const showWarning =
+    item.threshold !== null && quantity <= item.threshold;
+
   return (
     <div
       className={`border bg-card p-3 ${borderRadiusClass} ${
         isDeleting ? "opacity-50" : ""
-      }`}
+      } ${showWarning ? "border-amber-500/50 bg-amber-50 dark:bg-amber-950/20" : ""}`}
     >
-      <div className="font-medium">{item.name}</div>
+      <div className="flex items-center gap-1.5 font-medium">
+        {showWarning && <AlertTriangle className="h-4 w-4 text-amber-500" />}
+        {item.name}
+      </div>
       <div className="mt-1 flex items-center justify-between">
         <div className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
           {item.productName || "\u00A0"}
@@ -78,10 +85,7 @@ export function ItemCard({ item, onUpdate, noBorderRadius }: ItemCardProps) {
             <Minus className="h-4 w-4" />
           </Button>
           <div className="flex min-w-15 items-center justify-center gap-1 text-sm">
-            {quantity === 0 && (
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-            )}
-            <span className={quantity === 0 ? "text-amber-500" : ""}>
+            <span className={showWarning ? "text-amber-600 dark:text-amber-500" : ""}>
               {quantity}
               {item.unit}
             </span>
