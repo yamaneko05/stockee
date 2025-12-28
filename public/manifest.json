@@ -1,0 +1,9 @@
+{
+  "name": "Stockee - 暮らしの在庫管理",
+  "short_name": "日用品や食料品の在庫をスマホで簡単に管理。家族やルームメイトと共有もできる在庫管理アプリ。",
+  "icons": [
+    { "src": "/android-icon-192x192.png", "sizes": "192x192", "type": "image/png" }
+  ],
+  "display": "standalone",
+  "theme_color": "#5ea500"
+}
