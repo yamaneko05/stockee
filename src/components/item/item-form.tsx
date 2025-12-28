@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +39,7 @@ export function ItemForm({ item }: ItemFormProps) {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<CreateItemInput>({
     resolver: zodResolver(createItemSchema),
@@ -53,7 +53,7 @@ export function ItemForm({ item }: ItemFormProps) {
     },
   });
 
-  const currentUnit = watch("unit");
+  const currentUnit = useWatch({ control, name: "unit" });
 
   const onSubmit = (data: CreateItemInput) => {
     startTransition(async () => {
