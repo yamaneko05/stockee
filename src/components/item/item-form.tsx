@@ -67,13 +67,8 @@ export function ItemForm({ item }: ItemFormProps) {
   const currentCategoryId = useWatch({ control, name: "categoryId" });
 
   useEffect(() => {
-    if (selectedGroupId) {
-      getCategories(selectedGroupId).then(setCategories);
-    } else {
-      startTransition(() => {
-        setCategories([]);
-      });
-    }
+    // グループ選択時はグループのカテゴリ、未選択時は個人のカテゴリを取得
+    getCategories(selectedGroupId).then(setCategories);
   }, [selectedGroupId]);
 
   const onSubmit = (data: CreateItemInput) => {
@@ -114,7 +109,9 @@ export function ItemForm({ item }: ItemFormProps) {
           id="price"
           type="number"
           min="0"
-          {...register("price", { valueAsNumber: true })}
+          {...register("price", {
+            setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
+          })}
         />
       </div>
 
@@ -180,7 +177,7 @@ export function ItemForm({ item }: ItemFormProps) {
         )}
       </div>
 
-      {selectedGroupId && categories.length > 0 && (
+      {categories.length > 0 && (
         <div className="space-y-2">
           <Label htmlFor="category">カテゴリ</Label>
           <Select
