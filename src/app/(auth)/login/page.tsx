@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -49,9 +50,25 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
+      <Image
+        src="/auth-background.png"
+        alt=""
+        fill
+        className="object-cover -z-10"
+        priority
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">日用品在庫管理</CardTitle>
+          <CardTitle className="flex items-center justify-center gap-1">
+            <Image
+              src="/icon.png"
+              alt="icon"
+              width={48}
+              height={48}
+              unoptimized
+            />
+            <h1 className="text-3xl font-bold font-logo">Stockee</h1>
+          </CardTitle>
           <CardDescription>
             アカウントにログインしてください
           </CardDescription>
@@ -63,7 +80,7 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-2 sm:grid sm:grid-cols-[100px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
               <Label htmlFor="email">メールアドレス</Label>
               <Input
                 id="email"
@@ -75,7 +92,7 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 sm:grid sm:grid-cols-[100px_1fr] sm:items-center sm:gap-4 sm:space-y-0">
               <Label htmlFor="password">パスワード</Label>
               <Input
                 id="password"
