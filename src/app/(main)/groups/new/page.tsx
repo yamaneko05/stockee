@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +31,7 @@ export default function NewGroupPage() {
     try {
       const group = await createGroup({ name: name.trim() });
       setSelectedGroupId(group.id);
+      toast.success("グループを作成しました");
       router.push(`/groups/${group.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Check, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,6 +62,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
       }
 
       setIsEditingName(false);
+      toast.success("ユーザー名を更新しました");
       router.refresh();
     } catch {
       setNameError("更新に失敗しました");
@@ -116,6 +118,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      toast.success("パスワードを変更しました");
 
       setTimeout(() => {
         setIsPasswordDialogOpen(false);

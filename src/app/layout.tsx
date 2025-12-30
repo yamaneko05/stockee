@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Quicksand } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const notoSansJp = Noto_Sans_JP({
@@ -28,6 +29,7 @@ export default function RootLayout({
         className={`${notoSansJp.variable} ${quicksand.variable} font-sans antialiased`}
       >
         {children}
+        <Toaster richColors />
       </body>
     </html>
   );

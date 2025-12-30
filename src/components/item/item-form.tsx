@@ -4,6 +4,7 @@ import { useTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,8 +76,10 @@ export function ItemForm({ item }: ItemFormProps) {
     startTransition(async () => {
       if (isEditing) {
         await updateItem(item.id, data);
+        toast.success("品目を更新しました");
       } else {
         await createItem(data, selectedGroupId);
+        toast.success("品目を登録しました");
       }
       router.push("/");
     });

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Minus, Plus, MoreVertical, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -49,6 +50,7 @@ export function ItemCard({ item, onUpdate, noBorderRadius }: ItemCardProps) {
     setIsDeleting(true);
     startTransition(async () => {
       await deleteItem(item.id);
+      toast.success("品目を削除しました");
       onUpdate?.();
     });
   };

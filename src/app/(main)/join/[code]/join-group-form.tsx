@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { joinGroup } from "@/actions/group";
@@ -28,6 +29,7 @@ export function JoinGroupForm({ group, inviteCode }: { group: GroupInfo; inviteC
     try {
       const joinedGroup = await joinGroup(inviteCode);
       setSelectedGroupId(joinedGroup.id);
+      toast.success("グループに参加しました");
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");

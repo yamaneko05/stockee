@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Copy, Check, RefreshCw, Trash2, LogOut, Users, Tags } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { deleteGroup, leaveGroup, regenerateInviteCode, removeMember } from "@/actions/group";
@@ -47,6 +48,7 @@ export function GroupSettings({ group }: { group: GroupData }) {
     if (!inviteUrl) return;
     await navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
+    toast.success("招待リンクをコピーしました");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -58,6 +60,7 @@ export function GroupSettings({ group }: { group: GroupData }) {
     try {
       const newCode = await regenerateInviteCode(group.id);
       setInviteCode(newCode);
+      toast.success("招待リンクを再生成しました");
     } catch (err) {
       alert(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {
@@ -72,6 +75,7 @@ export function GroupSettings({ group }: { group: GroupData }) {
     try {
       await deleteGroup(group.id);
       setSelectedGroupId(null);
+      toast.success("グループを削除しました");
       router.push("/");
     } catch (err) {
       alert(err instanceof Error ? err.message : "エラーが発生しました");
@@ -85,6 +89,7 @@ export function GroupSettings({ group }: { group: GroupData }) {
     try {
       await leaveGroup(group.id);
       setSelectedGroupId(null);
+      toast.success("グループから脱退しました");
       router.push("/");
     } catch (err) {
       alert(err instanceof Error ? err.message : "エラーが発生しました");
@@ -97,6 +102,7 @@ export function GroupSettings({ group }: { group: GroupData }) {
     }
     try {
       await removeMember(group.id, memberId);
+      toast.success("メンバーを削除しました");
       router.refresh();
     } catch (err) {
       alert(err instanceof Error ? err.message : "エラーが発生しました");
