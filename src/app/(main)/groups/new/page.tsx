@@ -32,7 +32,7 @@ export default function NewGroupPage() {
       const group = await createGroup({ name: name.trim() });
       setSelectedGroupId(group.id);
       toast.success("グループを作成しました");
-      router.push(`/groups/${group.id}`);
+      router.push("/settings?tab=groups");
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");
     } finally {

@@ -126,18 +126,8 @@ export function ItemList() {
 
   return (
     <div>
-      <div className="flex items-center justify-between border-b px-4 py-3">
+      <div className="border-b px-4 py-3">
         <h1 className="text-lg font-semibold">在庫一覧</h1>
-        <div className="flex items-center gap-1">
-          {selectedGroupId && (
-            <Button variant="ghost" size="icon" asChild>
-              <Link href={`/groups/${selectedGroupId}`}>
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">グループ設定</span>
-              </Link>
-            </Button>
-          )}
-        </div>
       </div>
 
       <div className="p-4 space-y-4">

@@ -4,9 +4,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogoutButton } from "@/components/auth/logout-button";
-import { AccountSettings } from "@/components/settings/account-settings";
-import { PersonalCategories } from "./personal-categories";
+import { SettingsTabs } from "@/components/settings/settings-tabs";
+import { getGroups } from "@/actions/group";
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({
@@ -18,6 +17,7 @@ export default async function SettingsPage() {
   }
 
   const { user } = session;
+  const groups = await getGroups();
 
   return (
     <div>
@@ -33,14 +33,11 @@ export default async function SettingsPage() {
         </h1>
       </div>
 
-      <div className="space-y-6 p-4">
-        <AccountSettings
+      <div className="p-4">
+        <SettingsTabs
           user={{ id: user.id, name: user.name, email: user.email }}
+          groups={groups}
         />
-
-        <PersonalCategories />
-
-        <LogoutButton />
       </div>
     </div>
   );
