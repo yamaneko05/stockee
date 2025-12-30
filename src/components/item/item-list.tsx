@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
-import { Settings } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -18,7 +16,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Button } from "@/components/ui/button";
 import { SortableItemCard } from "@/components/item/sortable-item-card";
 import { CategoryFilter } from "@/components/category/category-filter";
 import { getItems, reorderItems } from "@/actions/item";
@@ -26,6 +23,7 @@ import { getCategories } from "@/actions/category";
 import { useGroup } from "@/contexts/group-context";
 import type { ItemModel } from "@/generated/prisma/models/Item";
 import type { CategoryModel } from "@/generated/prisma/models/Category";
+import { Skeleton } from "../ui/skeleton";
 
 type ItemWithCategory = ItemModel & { category: CategoryModel | null };
 
@@ -118,54 +116,57 @@ export function ItemList() {
 
   if (isLoading) {
     return (
-      <div className="p-4">
-        <p className="text-muted-foreground">読み込み中...</p>
+      <div className="p-4 space-y-4">
+        <div className="flex gap-2 pb-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-7 w-16 rounded-full" />
+          ))}
+        </div>
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-16" />
+          ))}
+        </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div>
-      <div className="border-b px-4 py-3">
-        <h1 className="text-lg font-semibold">在庫一覧</h1>
-      </div>
+    <div className="p-4 space-y-4">
+      {categories.length > 0 && (
+        <CategoryFilter
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          onSelect={setSelectedCategoryId}
+        />
+      )}
 
-      <div className="p-4 space-y-4">
-        {categories.length > 0 && (
-          <CategoryFilter
-            categories={categories}
-            selectedCategoryId={selectedCategoryId}
-            onSelect={setSelectedCategoryId}
-          />
-        )}
-
-        {items.length === 0 ? (
-          <p className="text-muted-foreground">品目がありません</p>
-        ) : filteredItems.length === 0 ? (
-          <p className="text-muted-foreground">該当する品目がありません</p>
-        ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+      {items.length === 0 ? (
+        <p className="text-muted-foreground">品目がありません</p>
+      ) : filteredItems.length === 0 ? (
+        <p className="text-muted-foreground">該当する品目がありません</p>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={filteredItems.map((item) => item.id)}
+            strategy={verticalListSortingStrategy}
           >
-            <SortableContext
-              items={filteredItems.map((item) => item.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="flex flex-col gap-3">
-                {filteredItems.map((item) => (
-                  <SortableItemCard
-                    key={item.id}
-                    item={item}
-                    onUpdate={refreshItems}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        )}
-      </div>
+            <div className="flex flex-col gap-3">
+              {filteredItems.map((item) => (
+                <SortableItemCard
+                  key={item.id}
+                  item={item}
+                  onUpdate={refreshItems}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
     </div>
   );
 }

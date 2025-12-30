@@ -6,7 +6,12 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <>
-      <ItemList />
+      <div>
+        <div className="border-b px-4 py-3">
+          <h1 className="text-lg font-semibold">在庫一覧</h1>
+        </div>
+        <ItemList />
+      </div>
       <Button
         size="icon"
         className="fixed bottom-8 right-4 z-50 h-14 w-14 rounded-full shadow-lg"

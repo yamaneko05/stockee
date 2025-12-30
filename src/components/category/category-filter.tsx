@@ -28,7 +28,7 @@ export function CategoryFilter({
       <button
         onClick={() => onSelect(null)}
         className={cn(
-          "flex-shrink-0 rounded-full px-3 py-1 text-sm font-medium transition-colors",
+          "shrink-0 rounded-full px-3 py-1 text-sm font-medium transition-colors",
           selectedCategoryId === null
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground hover:bg-muted/80",
@@ -39,7 +39,7 @@ export function CategoryFilter({
       <button
         onClick={() => onSelect("uncategorized")}
         className={cn(
-          "flex-shrink-0 rounded-full px-3 py-1 text-sm font-medium transition-colors",
+          "shrink-0 rounded-full px-3 py-1 text-sm font-medium transition-colors",
           selectedCategoryId === "uncategorized"
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground hover:bg-muted/80",
@@ -52,7 +52,7 @@ export function CategoryFilter({
           key={category.id}
           onClick={() => onSelect(category.id)}
           className={cn(
-            "flex-shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-colors",
+            "shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-colors",
             selectedCategoryId === category.id
               ? "bg-primary text-primary-foreground"
               : "bg-muted text-muted-foreground hover:bg-muted/80",
